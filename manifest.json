@@ -1,0 +1,10 @@
+{
+  "name": "MyChat",
+  "short_name": "MyChat",
+  "description": "MyChat is a messaging app with text, audio and video calling.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#e5ddd5",
+  "theme_color": "#128C7E"
+}
