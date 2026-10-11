@@ -1,0 +1,1843 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MyChat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #e5ddd5;
+    }
+
+    .header {
+      background: #128C7E;
+      color: white;
+      padding: 16px;
+      font-size: 21px;
+      font-weight: bold;
+    }
+
+    .user {
+      background: white;
+      margin: 8px;
+      padding: 15px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .userInfo {
+      flex: 1;
+    }
+
+    .email {
+      color: #666;
+      margin: 5px 0;
+      font-size: 13px;
+    }
+
+    .onlineStatus {
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .online {
+      color: #128C7E;
+    }
+
+    .offline {
+      color: #777;
+    }
+
+    .profilePhoto {
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #ddd;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .chatButton {
+      background: #128C7E;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 7px;
+    }
+
+    #userScreen,
+    #chatScreen {
+      display: none;
+    }
+
+    /* PROFILE */
+
+    .profileBox {
+      background: white;
+      margin: 10px;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    #myProfilePhoto {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #ddd;
+      display: block;
+      margin: 10px auto;
+    }
+
+    #profileName {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin: 8px 0;
+      font-size: 16px;
+    }
+
+    .profileButton {
+      background: #128C7E;
+      color: white;
+      border: none;
+      padding: 11px 20px;
+      border-radius: 7px;
+    }
+
+    #profileInput {
+      display: none;
+    }
+
+    #profileStatus {
+      margin: 8px;
+      color: #128C7E;
+    }
+
+    /* CHAT */
+
+    .chatHeader {
+      background: #128C7E;
+      color: white;
+      padding: 10px;
+      font-size: 19px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .back {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 25px;
+    }
+
+    #chatName {
+      flex: 1;
+    }
+
+    #chatOnlineStatus {
+      font-size: 12px;
+      font-weight: normal;
+    }
+
+    #chatProfilePhoto {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #ddd;
+    }
+
+    #messages {
+      padding: 10px;
+      padding-bottom: 75px;
+    }
+
+    .messageRow {
+      display: flex;
+      margin: 6px 0;
+    }
+
+    .myRow {
+      justify-content: flex-end;
+    }
+
+    .otherRow {
+      justify-content: flex-start;
+    }
+
+    .message {
+      max-width: 75%;
+      padding: 9px;
+      border-radius: 10px;
+      background: white;
+      word-wrap: break-word;
+    }
+
+    .myMessage {
+      background: #dcf8c6;
+    }
+
+    .messageTime {
+      font-size: 10px;
+      color: #777;
+      text-align: right;
+      margin-top: 4px;
+    }
+
+    .chatPhoto {
+      display: block;
+      max-width: 230px;
+      max-height: 300px;
+      border-radius: 8px;
+      margin-bottom: 4px;
+    }
+
+    .bottom {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #f0f0f0;
+      padding: 8px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    #messageInput {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      min-width: 0;
+    }
+
+    #sendButton {
+      background: #128C7E;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 20px;
+    }
+
+    #photoButton {
+      background: white;
+      border: 1px solid #ccc;
+      font-size: 21px;
+      width: 45px;
+      height: 42px;
+      border-radius: 50%;
+    }
+
+    #photoInput {
+      display: none;
+    }
+
+    #photoStatus {
+      position: fixed;
+      bottom: 60px;
+      left: 10px;
+      right: 10px;
+      background: white;
+      padding: 8px;
+      border-radius: 8px;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<!-- CALL SCREEN -->
+<div id="callScreen"
+  style="
+    display:none;
+    position:fixed;
+    inset:0;
+    background:#111;
+    z-index:9999;
+    color:white;
+    text-align:center;
+    padding:20px;
+  ">
+
+  <h2 id="callTitle">Calling...</h2>
+
+  <video id="remoteVideo"
+    autoplay
+    playsinline
+    style="
+      width:100%;
+      max-height:65vh;
+      background:#000;
+      border-radius:10px;
+    ">
+  </video>
+
+  <video id="localVideo"
+    autoplay
+    muted
+    playsinline
+    style="
+      width:120px;
+      height:160px;
+      object-fit:cover;
+      position:absolute;
+      right:15px;
+      top:80px;
+      background:#333;
+      border-radius:10px;
+    ">
+  </video>
+
+  <button onclick="endCall()"
+    style="
+      margin-top:20px;
+      background:#e53935;
+      color:white;
+      border:0;
+      border-radius:50%;
+      width:65px;
+      height:65px;
+      font-size:25px;
+    ">
+    📵
+  </button>
+
+</div>
+
+<!-- INCOMING CALL -->
+<div id="incomingCall"
+  style="
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.9);
+    z-index:10000;
+    color:white;
+    text-align:center;
+    padding-top:120px;
+  ">
+
+  <h2 id="incomingCallTitle">
+    Incoming Call
+  </h2>
+
+  <button onclick="answerCall()"
+    style="
+      background:#128C7E;
+      color:white;
+      border:0;
+      border-radius:50%;
+      width:70px;
+      height:70px;
+      font-size:28px;
+      margin:20px;
+    ">
+    📞
+  </button>
+
+  <button onclick="rejectCall()"
+    style="
+      background:#e53935;
+      color:white;
+      border:0;
+      border-radius:50%;
+      width:70px;
+      height:70px;
+      font-size:28px;
+      margin:20px;
+    ">
+    ❌
+  </button>
+
+</div>
+
+<body>
+
+<!-- LOGIN -->
+
+<div id="loginScreen"
+     style="padding:20px;background:white;min-height:100vh">
+
+  <h2>MyChat Login</h2>
+
+  <input id="loginEmail"
+    type="email"
+    placeholder="Email"
+    style="width:100%;padding:12px;margin:8px 0">
+
+  <input id="loginPassword"
+    type="password"
+    placeholder="Password"
+    style="width:100%;padding:12px;margin:8px 0">
+
+  <button onclick="loginUser()"
+    style="padding:12px 25px;background:#128C7E;color:white;border:0;border-radius:6px">
+    Login
+  </button>
+
+  <p id="loginStatus"></p>
+
+</div>
+
+
+<!-- USERS -->
+
+<div id="userScreen">
+
+  <div class="header">
+
+    MyChat
+
+    <button onclick="logout()"
+      style="float:right;background:white;color:#128C7E;border:0;padding:8px;border-radius:6px">
+      Logout
+    </button>
+
+  </div>
+
+
+  <!-- MY PROFILE -->
+
+  <div class="profileBox">
+
+    <h3>My Profile</h3>
+
+    <img id="myProfilePhoto"
+      src="https://via.placeholder.com/90">
+
+    <button class="profileButton"
+      onclick="document.getElementById('profileInput').click()">
+      📷 Profile Photo
+    </button>
+
+    <input
+      type="file"
+      id="profileInput"
+      accept="image/*"
+      onchange="selectProfilePhoto(event)">
+
+    <input
+      id="profileName"
+      type="text"
+      placeholder="अपना नाम लिखें">
+
+    <button
+      class="profileButton"
+      onclick="saveProfile()">
+      💾 Save Profile
+    </button>
+
+    <div id="profileStatus"></div>
+
+  </div>
+
+
+  <div id="status"
+       style="padding:15px;text-align:center">
+    Users लोड हो रहे हैं...
+  </div>
+
+  <div id="users"></div>
+
+</div>
+
+
+<!-- CHAT -->
+
+<div id="chatScreen">
+
+  <div class="chatHeader">
+
+    <button class="back"
+      onclick="backToUsers()">
+      ←
+    </button>
+
+    <img id="chatProfilePhoto"
+      src="https://via.placeholder.com/40">
+
+    <div style="flex:1">
+
+      <div id="chatName">
+        Chat
+      </div>
+
+      <div id="chatOnlineStatus">
+        Offline
+      </div>
+      <button onclick="startAudioCall()"
+  style="background:white;border:0;border-radius:6px;padding:8px;font-size:18px">
+  📞
+</button>
+
+<button onclick="startVideoCall()"
+  style="background:white;border:0;border-radius:6px;padding:8px;font-size:18px">
+  📹
+</button>
+
+    </div>
+
+  </div>
+
+  <div id="messages"></div>
+
+  <div id="photoStatus"></div>
+
+  <div class="bottom">
+
+    <button id="photoButton"
+      onclick="document.getElementById('photoInput').click()">
+      📷
+    </button>
+
+    <input
+      type="file"
+      id="photoInput"
+      accept="image/*"
+      onchange="sendPhoto(event)">
+
+    <input id="messageInput"
+      placeholder="Message लिखें..."
+      onkeydown="handleEnter(event)">
+
+    <button id="sendButton"
+      onclick="sendMessage()">
+      Send
+    </button>
+
+  </div>
+
+</div>
+
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut,
+  signInWithEmailAndPassword
+}
+from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+
+
+import {
+  getDatabase,
+  ref,
+  get,
+  push,
+  set,
+  onValue,
+  onDisconnect,
+  onChildAdded,
+  update
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
+
+
+
+/* FIREBASE */
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDJlc0BcaRyPtdFb9d-SNOPqwwuf2BylwU",
+
+  authDomain: "mychat-8ab46.firebaseapp.com",
+
+  databaseURL:
+  "https://mychat-8ab46-default-rtdb.asia-southeast1.firebasedatabase.app",
+
+  projectId: "mychat-8ab46",
+
+  storageBucket: "mychat-8ab46.firebasestorage.app",
+
+  messagingSenderId: "186347252945",
+
+  appId: "1:186347252945:web:e901cc8c5a16339e1a29f0"
+
+};
+
+
+const app =
+  initializeApp(firebaseConfig);
+
+const auth =
+  getAuth(app);
+
+const db =
+  getDatabase(app);
+
+
+let currentUser = null;
+let selectedUser = null;
+let chatId = "";
+let profilePhotoData = "";
+
+
+/* LOGIN */
+
+window.loginUser = async function() {
+
+  const email =
+    document.getElementById("loginEmail")
+      .value.trim();
+
+  const password =
+    document.getElementById("loginPassword")
+      .value;
+
+  const status =
+    document.getElementById("loginStatus");
+
+
+  if (!email || !password) {
+
+    status.innerText =
+      "Email और Password डालिए";
+
+    return;
+  }
+
+
+  status.innerText =
+    "Login हो रहा है...";
+
+
+  try {
+
+    await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
+    status.innerText =
+      "Login सफल हुआ";
+
+  } catch(error) {
+
+    status.innerText =
+      "Login Error: " +
+      error.message;
+
+  }
+
+};
+
+/* LOGOUT */
+
+window.logout = async function() {
+  try {
+    await signOut(auth);
+    alert("Logout सफल हुआ। अब दूसरे अकाउंट से Login करें।");
+  } catch (error) {
+    alert("Logout Error: " + error.message);
+  }
+};
+
+
+
+/* AUTH */
+
+onAuthStateChanged(
+  auth,
+  function(user) {
+
+    if (!user) {
+
+      currentUser = null;
+
+      document.getElementById(
+        "loginScreen"
+      ).style.display = "block";
+
+      document.getElementById(
+        "userScreen"
+      ).style.display = "none";
+
+      document.getElementById(
+        "chatScreen"
+      ).style.display = "none";
+
+      return;
+    }
+
+
+    currentUser = user;
+
+
+    document.getElementById(
+      "loginScreen"
+    ).style.display = "none";
+
+    document.getElementById(
+      "userScreen"
+    ).style.display = "block";
+
+    document.getElementById(
+      "chatScreen"
+    ).style.display = "none";
+
+
+    setOnlineStatus();
+
+    loadMyProfile();
+
+    watchUsers();
+    watchIncomingCalls();
+
+  }
+);
+
+
+/* ONLINE / OFFLINE */
+
+async function setOnlineStatus() {
+
+  if (!currentUser) return;
+
+
+  const myStatusRef =
+    ref(
+      db,
+      "users/" +
+      currentUser.uid +
+      "/online"
+    );
+
+
+  const connectedRef =
+    ref(
+      db,
+      ".info/connected"
+    );
+
+
+  onValue(
+    connectedRef,
+    async function(snapshot) {
+
+      if (snapshot.val() !== true) {
+
+        return;
+
+      }
+
+
+      await onDisconnect(
+        myStatusRef
+      ).set(false);
+
+
+      await set(
+        myStatusRef,
+        true
+      );
+
+    }
+  );
+
+}
+
+
+/* WATCH USERS */
+
+function watchUsers() {
+
+  const usersRef =
+    ref(db, "users");
+
+
+  onValue(
+    usersRef,
+    function(snapshot) {
+
+      displayUsers(snapshot);
+
+    }
+  );
+
+}
+
+
+/* DISPLAY USERS */
+
+function displayUsers(snapshot) {
+
+  const status =
+    document.getElementById("status");
+
+
+  const usersBox =
+    document.getElementById("users");
+
+
+  usersBox.innerHTML = "";
+
+
+  let found = false;
+
+
+  snapshot.forEach(
+    function(child) {
+
+     const user = {
+  ...child.val(),
+  uid: child.key
+};
+
+      if (
+        currentUser &&
+        user.uid !== currentUser.uid
+      ) {
+
+        found = true;
+
+
+        const div =
+          document.createElement("div");
+
+
+        div.className =
+          "user";
+
+
+        const photo =
+          user.photo ||
+          "https://via.placeholder.com/55";
+
+
+        const onlineText =
+          user.online === true
+            ? "🟢 Online"
+            : "⚪ Offline";
+
+
+        const onlineClass =
+          user.online === true
+            ? "online"
+            : "offline";
+
+
+        div.innerHTML = `
+
+          <img
+            class="profilePhoto"
+            src="${photo}">
+
+          <div class="userInfo">
+
+            <b>
+              ${user.name || "User"}
+            </b>
+
+            <div class="email">
+              ${user.email || ""}
+            </div>
+
+            <div class="onlineStatus ${onlineClass}">
+              ${onlineText}
+            </div>
+
+          </div>
+
+          <button class="chatButton">
+            Chat
+          </button>
+
+        `;
+
+
+        div.querySelector(
+          ".chatButton"
+        ).onclick =
+        function() {
+
+          openChat(user);
+
+        };
+
+
+        usersBox.appendChild(div);
+
+      }
+
+    }
+  );
+
+
+  if (!found) {
+
+    status.innerText =
+      "दूसरा User अभी नहीं है";
+
+  } else {
+
+    status.innerText = "";
+
+  }
+
+}
+
+
+/* LOAD MY PROFILE */
+
+async function loadMyProfile() {
+
+  try {
+
+    const snapshot =
+      await get(
+        ref(
+          db,
+          "users/" +
+          currentUser.uid
+        )
+      );
+
+
+    if (snapshot.exists()) {
+
+      const user =
+        snapshot.val();
+
+
+      document.getElementById(
+        "profileName"
+      ).value =
+        user.name || "";
+
+
+      if (user.photo) {
+
+        profilePhotoData =
+          user.photo;
+
+        document.getElementById(
+          "myProfilePhoto"
+        ).src =
+          user.photo;
+
+      }
+
+    }
+
+  } catch(error) {
+
+    document.getElementById(
+      "profileStatus"
+    ).innerText =
+      "Profile Load Error: " +
+      error.message;
+
+  }
+
+}
+
+
+/* SELECT PROFILE PHOTO */
+
+window.selectProfilePhoto =
+function(event) {
+
+  const file =
+    event.target.files[0];
+
+
+  if (!file) return;
+
+
+  if (file.size > 500 * 1024) {
+
+    alert(
+      "Profile Photo 500 KB से छोटी रखें।"
+    );
+
+    event.target.value = "";
+
+    return;
+
+  }
+
+
+  const reader =
+    new FileReader();
+
+
+  reader.onload =
+  function() {
+
+    profilePhotoData =
+      reader.result;
+
+
+    document.getElementById(
+      "myProfilePhoto"
+    ).src =
+      profilePhotoData;
+
+  };
+
+
+  reader.readAsDataURL(file);
+
+};
+
+
+/* SAVE PROFILE */
+
+window.saveProfile =
+async function() {
+
+  const name =
+    document.getElementById(
+      "profileName"
+    ).value.trim();
+
+
+  const status =
+    document.getElementById(
+      "profileStatus"
+    );
+
+
+  if (!name) {
+
+    status.innerText =
+      "पहले अपना नाम लिखें";
+
+    return;
+
+  }
+
+
+  status.innerText =
+    "Profile Save हो रही है...";
+
+
+  try {
+
+    await set(
+      ref(
+        db,
+        "users/" +
+        currentUser.uid
+      ),
+      {
+
+        uid:
+          currentUser.uid,
+
+        name:
+          name,
+
+        email:
+          currentUser.email,
+
+        photo:
+          profilePhotoData || "",
+
+        online:
+          true,
+
+        updatedAt:
+          Date.now()
+
+      }
+    );
+
+
+    status.innerText =
+      "Profile Save हो गई ✓";
+
+
+  } catch(error) {
+
+    status.innerText =
+      "Profile Error: " +
+      error.message;
+
+  }
+
+};
+
+/* BACK TO USERS */
+
+window.backToUsers = function() {
+  document.getElementById("chatScreen").style.display = "none";
+  document.getElementById("userScreen").style.display = "block";
+  selectedUser = null;
+  chatId = "";
+};
+
+
+
+
+/* OPEN CHAT */
+
+
+window.openChat = function(user) {
+  if (!user || !user.uid) {
+    alert("इस User की Firebase ID नहीं मिली।");
+    return;
+  }
+
+  selectedUser = {
+    ...user,
+    uid: String(user.uid)
+  };
+
+  window.currentChatUser = selectedUser;
+  
+
+
+  document.getElementById(
+    "userScreen"
+  ).style.display =
+    "none";
+
+
+  document.getElementById(
+    "chatScreen"
+  ).style.display =
+    "block";
+
+
+  document.getElementById(
+    "chatName"
+  ).innerText =
+    user.name ||
+    user.email ||
+    "Chat";
+
+
+  document.getElementById(
+    "chatProfilePhoto"
+  ).src =
+    user.photo ||
+    "https://via.placeholder.com/40";
+
+
+  updateChatOnlineStatus(
+    user.online
+  );
+
+
+  const ids = [
+
+    currentUser.uid,
+    user.uid
+
+  ];
+
+
+  ids.sort();
+
+
+  chatId =
+    ids[0] +
+    "_" +
+    ids[1];
+
+
+  document.getElementById(
+    "messages"
+  ).innerHTML = "";
+
+
+  loadMessages();
+
+};
+
+
+/* CHAT ONLINE STATUS */
+
+function updateChatOnlineStatus(
+  isOnline
+) {
+
+  const status =
+    document.getElementById(
+      "chatOnlineStatus"
+    );
+
+
+  if (isOnline === true) {
+
+    status.innerText =
+      "🟢 Online";
+
+  } else {
+
+    status.innerText =
+      "⚪ Offline";
+
+  }
+
+}
+
+
+/* MESSAGES */
+
+function loadMessages() {
+
+  const messagesRef =
+    ref(
+      db,
+      "chats/" +
+      chatId +
+      "/messages"
+    );
+
+
+  onChildAdded(
+    messagesRef,
+    function(snapshot) {
+
+      showMessage(
+        snapshot.val()
+      );
+
+    }
+  );
+
+}
+
+
+/* SHOW MESSAGE */
+
+function showMessage(message) {
+
+  const row =
+    document.createElement("div");
+
+
+  const box =
+    document.createElement("div");
+
+
+  const mine =
+    message.senderId ===
+    currentUser.uid;
+
+
+  row.className =
+    mine
+      ? "messageRow myRow"
+      : "messageRow otherRow";
+
+
+  box.className =
+    mine
+      ? "message myMessage"
+      : "message";
+
+
+  if (message.type === "photo") {
+
+    const image =
+      document.createElement("img");
+
+
+    image.src =
+      message.photo;
+
+
+    image.className =
+      "chatPhoto";
+
+
+    box.appendChild(image);
+
+  }
+
+
+  if (message.type !== "photo") {
+
+    box.innerText =
+      message.text || "";
+
+  }
+
+
+  const time =
+    document.createElement("div");
+
+
+  time.className =
+    "messageTime";
+
+
+  time.innerText =
+    new Date(
+      message.time
+    ).toLocaleTimeString(
+      [],
+      {
+        hour: "2-digit",
+        minute: "2-digit"
+      }
+    );
+
+
+  box.appendChild(time);
+
+
+  row.appendChild(box);
+
+
+  document.getElementById(
+    "messages"
+  ).appendChild(row);
+
+
+  window.scrollTo(
+    0,
+    document.body.scrollHeight
+  );
+
+}
+
+
+/* SEND TEXT */
+
+window.sendMessage =
+async function() {
+
+  const input =
+    document.getElementById(
+      "messageInput"
+    );
+
+
+  const text =
+    input.value.trim();
+
+
+  if (!text) return;
+
+
+  if (!selectedUser) {
+
+    alert(
+      "पहले Chat खोलें"
+    );
+
+    return;
+
+  }
+
+
+  try {
+
+    await push(
+      ref(
+        db,
+        "chats/" +
+        chatId +
+        "/messages"
+      ),
+      {
+
+        type:
+          "text",
+
+        text:
+          text,
+
+        senderId:
+          currentUser.uid,
+
+        senderName:
+          currentUser.email,
+
+        time:
+          Date.now()
+
+      }
+    );
+
+
+    input.value = "";
+
+
+  } catch(error) {
+
+    alert(
+      "Message Error: " +
+      error.message
+    );
+
+  }
+
+};
+
+
+/* SEND PHOTO */
+
+window.sendPhoto =
+function(event) {
+
+  const file =
+    event.target.files[0];
+
+
+  if (!file) return;
+
+
+  if (!selectedUser) {
+
+    alert(
+      "पहले Chat खोलें"
+    );
+
+    event.target.value = "";
+
+    return;
+
+  }
+
+
+  if (file.size > 700 * 1024) {
+
+    alert(
+      "Photo 700 KB से छोटी रखें।"
+    );
+
+    event.target.value = "";
+
+    return;
+
+  }
+
+
+  const status =
+    document.getElementById(
+      "photoStatus"
+    );
+
+
+  status.innerText =
+    "Photo भेजी जा रही है...";
+
+
+  status.style.display =
+    "block";
+
+
+  const reader =
+    new FileReader();
+
+
+  reader.onload =
+  async function() {
+
+    try {
+
+      await push(
+        ref(
+          db,
+          "chats/" +
+          chatId +
+          "/messages"
+        ),
+        {
+
+          type:
+            "photo",
+
+          photo:
+            reader.result,
+
+          senderId:
+            currentUser.uid,
+
+          senderName:
+            currentUser.email,
+
+          time:
+            Date.now()
+
+        }
+      );
+
+
+      status.innerText =
+        "Photo भेज दी गई ✓";
+
+
+      
+      setTimeout(function() {
+        status.style.display = "none";
+      }, 3000);
+
+    } catch(error) {
+      status.innerText = "Photo Error: " + error.message;
+    }
+
+    event.target.value = "";
+
+  };
+
+  reader.readAsDataURL(file);
+  };
+  
+  
+/* AUDIO AND VIDEO CALLS */
+
+let activeCallId = null;
+let activeCallRole = null;
+let activeCallType = "audio";
+let incomingCallId = null;
+let localCallStream = null;
+let callPeer = null;
+let incomingCallsUnsub = null;
+let callWatchUnsub = null;
+let remoteCandidatesUnsub = null;
+
+const callConfig = {
+  iceServers: [
+    { urls: "stun:stun.l.google.com:19302" }
+  ]
+};
+
+function showCallScreen(type) {
+  document.getElementById("callScreen").style.display = "block";
+  document.getElementById("remoteVideo").style.display =
+    type === "video" ? "block" : "none";
+  document.getElementById("localVideo").style.display =
+    type === "video" ? "block" : "none";
+  document.getElementById("callTitle").innerText =
+    type === "video" ? "Video Call" : "Audio Call";
+}
+
+async function prepareCall(type, callId, role) {
+  if (!navigator.mediaDevices ||
+      !navigator.mediaDevices.getUserMedia) {
+    throw new Error(
+      "Camera/Microphone unavailable. Open MyChat on HTTPS."
+    );
+  }
+
+  localCallStream = await navigator.mediaDevices.getUserMedia({
+    audio: true,
+    video: type === "video"
+  });
+
+  callPeer = new RTCPeerConnection(callConfig);
+
+  localCallStream.getTracks().forEach(function(track) {
+    callPeer.addTrack(track, localCallStream);
+  });
+
+  if (type === "video") {
+    document.getElementById("localVideo").srcObject = localCallStream;
+  }
+
+  callPeer.ontrack = function(event) {
+    document.getElementById("remoteAudio").srcObject = event.streams[0];
+    document.getElementById("remoteVideo").srcObject = event.streams[0];
+  };
+
+  callPeer.onicecandidate = async function(event) {
+    if (event.candidate) {
+      try {
+        await push(
+          ref(db, "callCandidates/" + callId + "/" + role),
+          event.candidate.toJSON()
+        );
+      } catch (error) {
+        console.log("ICE candidate error:", error.message);
+      }
+    }
+  };
+}
+
+function listenRemoteCandidates(callId, remoteRole) {
+  if (remoteCandidatesUnsub) remoteCandidatesUnsub();
+
+  remoteCandidatesUnsub = onChildAdded(
+    ref(db, "callCandidates/" + callId + "/" + remoteRole),
+    async function(snapshot) {
+      if (!callPeer || !callPeer.remoteDescription) return;
+
+      try {
+        await callPeer.addIceCandidate(
+          new RTCIceCandidate(snapshot.val())
+        );
+      } catch (error) {
+        console.log("Remote candidate error:", error.message);
+      }
+    }
+  );
+}
+
+window.startAudioCall = function() {
+  startCall("audio");
+};
+
+window.startVideoCall = function() {
+  startCall("video");
+};
+
+async function startCall(type) {
+  if (!currentUser || !selectedUser || !currentUser.uid || !selectedUser.uid) {
+alert("User की जानकारी नहीं मिली। वापस जाकर दूसरे User की Chat फिर से खोलें।");
+return;
+}
+
+if (selectedUser.uid === currentUser.uid) {
+alert("दूसरे अलग अकाउंट को Call करें।");
+return;
+}
+
+  if (selectedUser.uid === currentUser.uid) {
+    alert("दूसरे अलग अकाउंट को Call करें।");
+    return;
+  }
+
+  if (callPeer) {
+    alert("पहले चल रही Call समाप्त करें।");
+    return;
+  }
+
+  try {
+    activeCallType = type;
+    activeCallRole = "caller";
+
+    const callRef = push(ref(db, "calls"));
+    activeCallId = callRef.key;
+
+    await set(callRef, {
+      callerId: currentUser.uid,
+      calleeId: selectedUser.uid,
+      type: type,
+      status: "preparing",
+      createdAt: Date.now()
+    });
+
+    showCallScreen(type);
+    document.getElementById("callTitle").innerText = "Calling...";
+
+    await prepareCall(type, activeCallId, "caller");
+
+    const offer = await callPeer.createOffer();
+    await callPeer.setLocalDescription(offer);
+
+    await update(callRef, {
+      offer: {
+        type: offer.type,
+        sdp: offer.sdp
+      },
+      status: "ringing"
+    });
+
+    callWatchUnsub = onValue(callRef, async function(snapshot) {
+      const data = snapshot.val();
+      if (!data) return;
+
+      if (data.answer && callPeer &&
+          !callPeer.currentRemoteDescription) {
+        try {
+          await callPeer.setRemoteDescription(
+            new RTCSessionDescription(data.answer)
+          );
+          listenRemoteCandidates(activeCallId, "callee");
+          document.getElementById("callTitle").innerText =
+            "Call connected";
+        } catch (error) {
+          console.log("Answer error:", error.message);
+        }
+      }
+
+      if (data.status === "ended" || data.status === "rejected") {
+        cleanupCall();
+      }
+    });
+
+  } catch (error) {
+    alert("Call Error: " + error.message);
+    cleanupCall();
+  }
+}
+
+/* INCOMING CALL LISTENER */
+
+function watchIncomingCalls() {
+  if (incomingCallsUnsub) return;
+
+  incomingCallsUnsub = onValue(ref(db, "calls"), function(snapshot) {
+    if (!currentUser) return;
+
+    snapshot.forEach(function(child) {
+      const data = child.val();
+
+      if (
+        data.calleeId === currentUser.uid &&
+        data.callerId !== currentUser.uid &&
+        data.status === "ringing" &&
+        !callPeer
+      ) {
+        incomingCallId = child.key;
+        document.getElementById("incomingCallTitle").innerText =
+          (data.type === "video" ? "Video" : "Audio") +
+          " Call incoming";
+        document.getElementById("incomingCall").style.display = "block";
+      }
+    });
+  });
+}
+
+window.answerCall = async function() {
+  if (!incomingCallId) return;
+
+  const callId = incomingCallId;
+  const callRef = ref(db, "calls/" + callId);
+
+  try {
+    const snapshot = await get(callRef);
+    const data = snapshot.val();
+
+    if (!data || data.status !== "ringing") {
+      alert("यह Call अब उपलब्ध नहीं है।");
+      cleanupCall();
+      return;
+    }
+
+    activeCallId = callId;
+    activeCallRole = "callee";
+    activeCallType = data.type || "audio";
+
+    document.getElementById("incomingCall").style.display = "none";
+    showCallScreen(activeCallType);
+
+    await prepareCall(activeCallType, callId, "callee");
+
+    await callPeer.setRemoteDescription(
+      new RTCSessionDescription(data.offer)
+    );
+
+    listenRemoteCandidates(callId, "caller");
+
+    const answer = await callPeer.createAnswer();
+    await callPeer.setLocalDescription(answer);
+
+    await update(callRef, {
+      answer: {
+        type: answer.type,
+        sdp: answer.sdp
+      },
+      status: "answered"
+    });
+
+    document.getElementById("callTitle").innerText = "Call connected";
+
+  } catch (error) {
+    alert("Answer Error: " + error.message);
+    cleanupCall();
+  }
+};
+
+window.rejectCall = async function() {
+  if (incomingCallId) {
+    try {
+      await update(ref(db, "calls/" + incomingCallId), {
+        status: "rejected"
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  document.getElementById("incomingCall").style.display = "none";
+  incomingCallId = null;
+};
+
+window.endCall = async function() {
+  const callId = activeCallId;
+
+  if (callId) {
+    try {
+      await update(ref(db, "calls/" + callId), {
+        status: "ended"
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  cleanupCall();
+};
+
+function cleanupCall() {
+  if (callWatchUnsub) callWatchUnsub();
+  if (remoteCandidatesUnsub) remoteCandidatesUnsub();
+
+  callWatchUnsub = null;
+  remoteCandidatesUnsub = null;
+
+  if (callPeer) callPeer.close();
+  callPeer = null;
+
+  if (localCallStream) {
+    localCallStream.getTracks().forEach(function(track) {
+      track.stop();
+    });
+  }
+  localCallStream = null;
+
+  document.getElementById("callScreen").style.display = "none";
+  document.getElementById("incomingCall").style.display = "none";
+  document.getElementById("remoteAudio").srcObject = null;
+  document.getElementById("remoteVideo").srcObject = null;
+  document.getElementById("localVideo").srcObject = null;
+
+  activeCallId = null;
+  activeCallRole = null;
+  incomingCallId = null;
+}
+
+/* START LISTENING AFTER LOGIN */
+
+window.startAudioCall = function() {
+  startCall("audio");
+};
+
+</script>
+
+<!-- MyChat Call Screens -->
+<div id="callScreen" style="display:none;position:fixed;inset:0;background:#111;color:white;z-index:9999;text-align:center;padding:20px">
+  <h2 id="callTitle">Calling...</h2>
+  <audio id="remoteAudio" autoplay></audio>
+  <video id="remoteVideo" autoplay playsinline style="display:none;width:100%;max-height:60vh;background:#222"></video>
+  <video id="localVideo" autoplay muted playsinline style="display:none;width:110px;position:absolute;right:15px;top:80px"></video>
+  <button onclick="endCall()" style="margin-top:25px;padding:18px;background:#e53935;color:white;border:0;border-radius:50%">📵</button>
+</div>
+
+<div id="incomingCall" style="display:none;position:fixed;inset:0;background:#222;color:white;z-index:10000;text-align:center;padding-top:100px">
+  <h2 id="incomingCallTitle">Incoming Call</h2>
+  <button onclick="answerCall()" style="padding:18px;background:#128C7E;color:white;border:0;border-radius:50%">📞</button>
+  <button onclick="rejectCall()" style="padding:18px;background:#e53935;color:white;border:0;border-radius:50%">❌</button>
+</div>
+
+
+</body>
+</html>
