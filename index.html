@@ -1838,6 +1838,19 @@ window.startAudioCall = function() {
   <button onclick="answerCall()" style="padding:18px;background:#128C7E;color:white;border:0;border-radius:50%">📞</button>
   <button onclick="rejectCall()" style="padding:18px;background:#e53935;color:white;border:0;border-radius:50%">❌</button>
 </div>
+  <script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function() {
+    navigator.serviceWorker.register("./sw.js")
+      .then(function() {
+        console.log("Service Worker registered");
+      })
+      .catch(function(error) {
+        console.log("Service Worker error:", error);
+      });
+  });
+}
+  </script>
 
 
 </body>
