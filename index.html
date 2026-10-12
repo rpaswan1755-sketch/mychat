@@ -10,11 +10,59 @@
       box-sizing: border-box;
     }
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #e5ddd5;
-    }
+    
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  background: #e5ddd5;
+}
+
+#chatScreen {
+  height: 100vh;
+  height: 100dvh;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#chatScreen .chatHeader {
+  flex-shrink: 0;
+}
+
+#chatScreen #messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px;
+  padding-bottom: 16px;
+}
+
+#chatScreen .bottom {
+  position: static;
+  flex-shrink: 0;
+  width: 100%;
+  padding: 8px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+}
+
+#messageInput {
+  font-size: 16px;
+  min-height: 44px;
+}
+
+#sendButton {
+  font-size: 16px;
+  min-height: 44px;
+}
+    
 
     .header {
       background: #128C7E;
@@ -1084,7 +1132,9 @@ async function() {
 
 window.backToUsers = function() {
   document.getElementById("chatScreen").style.display = "none";
-  document.getElementById("userScreen").style.display = "block";
+  document.getElementById(
+  "chatScreen"
+).style.display = "flex";
   selectedUser = null;
   chatId = "";
 };
