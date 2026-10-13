@@ -418,27 +418,50 @@ body {
 
 <body>
 
-<!-- LOGIN -->
+<!-- MOBILE OTP LOGIN -->
 
 <div id="loginScreen"
      style="padding:20px;background:white;min-height:100vh">
 
   <h2>MyChat Login</h2>
+  <p>मोबाइल नंबर से लॉगिन करें</p>
 
-  <input id="loginEmail"
-    type="email"
-    placeholder="Email"
+  <label for="loginPhone">मोबाइल नंबर (+91)</label>
+
+  <input
+    id="loginPhone"
+    type="tel"
+    inputmode="tel"
+    placeholder="10 अंकों का मोबाइल नंबर"
+    maxlength="13"
     style="width:100%;padding:12px;margin:8px 0">
 
-  <input id="loginPassword"
-    type="password"
-    placeholder="Password"
-    style="width:100%;padding:12px;margin:8px 0">
+  <div id="recaptcha-container"
+       style="margin:12px 0"></div>
 
-  <button onclick="loginUser()"
-    style="padding:12px 25px;background:#128C7E;color:white;border:0;border-radius:6px">
-    Login
+  <button id="sendOtpButton"
+    onclick="sendOTP()"
+    style="padding:12px 20px;background:#128C7E;color:white;border:0;border-radius:6px">
+    OTP भेजें
   </button>
+
+  <div id="otpSection" style="display:none">
+
+    <input
+      id="loginOTP"
+      type="text"
+      inputmode="numeric"
+      autocomplete="one-time-code"
+      placeholder="SMS में आया OTP डालें"
+      maxlength="6"
+      style="width:100%;padding:12px;margin:12px 0">
+
+    <button onclick="verifyOTP()"
+      style="padding:12px 20px;background:#128C7E;color:white;border:0;border-radius:6px">
+      OTP Verify करके Login करें
+    </button>
+
+  </div>
 
   <p id="loginStatus"></p>
 
@@ -577,16 +600,13 @@ body {
 
 <script type="module">
 
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-
 import {
   getAuth,
   onAuthStateChanged,
   signOut,
-  signInWithEmailAndPassword
-}
-from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+  signInWithPhoneNumber,
+  RecaptchaVerifier
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
 
 import {
@@ -641,55 +661,80 @@ let chatId = "";
 let profilePhotoData = "";
 
 
-/* LOGIN */
 
-window.loginUser = async function() {
+/* PHONE OTP LOGIN */
 
-  const email =
-    document.getElementById("loginEmail")
-      .value.trim();
+let confirmationResult = null;
+let recaptchaVerifier = null;
 
-  const password =
-    document.getElementById("loginPassword")
-      .value;
+window.sendOTP = async function() {
+  const input = document.getElementById("loginPhone");
+  const status = document.getElementById("loginStatus");
 
-  const status =
-    document.getElementById("loginStatus");
+  let phone = input.value.trim().replace(/[\s()-]/g, "");
 
+  if (/^\d{10}$/.test(phone)) {
+    phone = "+91" + phone;
+  }
 
-  if (!email || !password) {
-
-    status.innerText =
-      "Email और Password डालिए";
-
+  if (!/^\+\d{10,15}$/.test(phone)) {
+    status.innerText = "सही मोबाइल नंबर और country code डालें।";
     return;
   }
 
-
-  status.innerText =
-    "Login हो रहा है...";
-
+  status.innerText = "OTP भेजा जा रहा है...";
 
   try {
+    if (!recaptchaVerifier) {
+      recaptchaVerifier = new RecaptchaVerifier(
+        auth,
+        "recaptcha-container",
+        { size: "normal" }
+      );
+    }
 
-    await signInWithEmailAndPassword(
+    confirmationResult = await signInWithPhoneNumber(
       auth,
-      email,
-      password
+      phone,
+      recaptchaVerifier
     );
 
-    status.innerText =
-      "Login सफल हुआ";
+    document.getElementById("otpSection").style.display = "block";
+    status.innerText = "OTP SMS से भेज दिया गया है।";
+  } catch (error) {
+    status.innerText = "OTP Error: " + error.message;
 
-  } catch(error) {
+    if (recaptchaVerifier) {
+      recaptchaVerifier.clear();
+      recaptchaVerifier = null;
+    }
+  }
+};
 
-    status.innerText =
-      "Login Error: " +
-      error.message;
+window.verifyOTP = async function() {
+  const code = document.getElementById("loginOTP").value.trim();
+  const status = document.getElementById("loginStatus");
 
+  if (!confirmationResult) {
+    status.innerText = "पहले OTP भेजें।";
+    return;
   }
 
+  if (!/^\d{6}$/.test(code)) {
+    status.innerText = "6 अंकों का OTP डालें।";
+    return;
+  }
+
+  status.innerText = "OTP जाँचा जा रहा है...";
+
+  try {
+    await confirmationResult.confirm(code);
+    status.innerText = "Login सफल हुआ!";
+  } catch (error) {
+    status.innerText = "OTP Error: " + error.message;
+  }
 };
+
 
 /* LOGOUT */
 
