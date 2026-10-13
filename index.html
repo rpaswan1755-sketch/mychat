@@ -1128,16 +1128,31 @@ async function() {
 
 };
 
-/* BACK TO USERS */
 
-window.backToUsers = function() {
+/* BACK TO USERS — FIX */
+
+function showUsersScreen() {
   document.getElementById("chatScreen").style.display = "none";
-  document.getElementById(
-  "chatScreen"
-).style.display = "flex";
+  document.getElementById("userScreen").style.display = "block";
+
   selectedUser = null;
   chatId = "";
+}
+
+window.backToUsers = function() {
+  if (window.location.hash === "#chat") {
+    window.history.back();
+  } else {
+    showUsersScreen();
+  }
 };
+
+window.addEventListener("popstate", function() {
+  if (document.getElementById("chatScreen").style.display !== "none") {
+    showUsersScreen();
+  }
+});
+
 
 
 
@@ -1146,6 +1161,9 @@ window.backToUsers = function() {
 
 
 window.openChat = function(user) {
+  if (window.location.hash !== "#chat") {
+  window.history.pushState({ screen: "chat" }, "", "#chat");
+  }
   if (!user || !user.uid) {
     alert("इस User की Firebase ID नहीं मिली।");
     return;
