@@ -1058,10 +1058,46 @@ function showCallScreen(type) {
   document.getElementById("callTitle").innerText = type === "video" ? "Video Call" : "Audio Call";
 }
 
-async function prepareCall(type, callId, role) {
+  async function prepareCall(type, callId, role) {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    throw new Error("Camera/Microphone unavailable.");
+    throw new Error("Camera/Microphone unavailable. Open MyChat on HTTPS.");
   }
+
+  localCallStream = await navigator.mediaDevices.getUserMedia({
+    audio: true,
+    video: type === "video"
+  });
+
+  // नया RTCPeerConnection बनाएं और सुनिश्चित करें कि यह null न हो
+  callPeer = new RTCPeerConnection(callConfig);
+
+  localCallStream.getTracks().forEach(function(track) {
+    callPeer.addTrack(track, localCallStream);
+  });
+
+  if (type === "video") {
+    const localVideo = document.getElementById("localVideo");
+    if (localVideo) localVideo.srcObject = localCallStream;
+  }
+
+  callPeer.ontrack = function(event) {
+    const remoteAudio = document.getElementById("remoteAudio");
+    const remoteVideo = document.getElementById("remoteVideo");
+    if (remoteAudio) remoteAudio.srcObject = event.streams[0];
+    if (remoteVideo) remoteVideo.srcObject = event.streams[0];
+  };
+
+  callPeer.onicecandidate = async function(event) {
+    if (event.candidate) {
+      try {
+        await push(ref(db, "callCandidates/" + callId + "/" + role), event.candidate.toJSON());
+      } catch (error) {
+        console.log("ICE error:", error.message);
+      }
+    }
+  };
+}
+
 
   localCallStream = await navigator.mediaDevices.getUserMedia({
     audio: true,
