@@ -309,19 +309,14 @@
 </head>
 
 <!-- CALL SCREEN -->
-<div id="callScreen"
-  style="
-    display:none;
-    position:fixed;
-    inset:0;
-    background:#111;
-    z-index:9999;
-    color:white;
-    text-align:center;
-    padding:20px;
-  ">
+<div id="callScreen">
 
-  <h2 id="callTitle">Calling...</h2>
+  <h2 id="callTitle" style="font-size:22px; margin-bottom:10px;">Audio Call</h2>
+
+  <!-- सामने वाले की प्रोफाइल फोटो और नाम -->
+  <img id="callProfilePhoto" class="callProfilePhoto" src="https://via.placeholder.com/130">
+  <div id="callUserName">User</div>
+  <div id="callTimer">Calling...</div>
 
   <audio id="remoteAudio" autoplay></audio>
 
@@ -329,10 +324,12 @@
     autoplay
     playsinline
     style="
+      display:none;
       width:100%;
-      max-height:65vh;
+      max-height:55vh;
       background:#000;
       border-radius:10px;
+      margin-top:15px;
     ">
   </video>
 
@@ -341,8 +338,9 @@
     muted
     playsinline
     style="
-      width:120px;
-      height:160px;
+      display:none;
+      width:110px;
+      height:150px;
       object-fit:cover;
       position:absolute;
       right:15px;
@@ -354,7 +352,10 @@
 
   <button onclick="endCall()"
     style="
-      margin-top:20px;
+      position: absolute;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
       background:#e53935;
       color:white;
       border:0;
@@ -362,13 +363,13 @@
       width:65px;
       height:65px;
       font-size:25px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     ">
     📵
   </button>
 
 </div>
 
-<!-- INCOMING CALL -->
 <div id="incomingCall"
   style="
     display:none;
@@ -1138,8 +1139,27 @@ async function startCall(type) {
       createdAt: Date.now()
     });
 
-    showCallScreen(type);
-    await prepareCall(type, activeCallId, "caller");
+    function showCallScreen(type) {
+  document.getElementById("callScreen").style.display = "block";
+
+  if (type === "video") {
+    document.getElementById("remoteVideo").style.display = "block";
+    document.getElementById("localVideo").style.display = "block";
+    document.getElementById("callProfilePhoto").style.display = "none";
+  } else {
+    document.getElementById("remoteVideo").style.display = "none";
+    document.getElementById("localVideo").style.display = "none";
+    document.getElementById("callProfilePhoto").style.display = "block";
+  }
+
+  document.getElementById("callTitle").innerText = type === "video" ? "Video Call" : "Audio Call";
+
+  if (selectedUser) {
+    document.getElementById("callUserName").innerText = selectedUser.name || selectedUser.email || "User";
+    document.getElementById("callProfilePhoto").src = selectedUser.photo || "https://via.placeholder.com/130";
+  }
+}
+
 
     const offer = await callPeer.createOffer();
     await callPeer.setLocalDescription(offer);
