@@ -10,59 +10,57 @@
       box-sizing: border-box;
     }
 
-    
-html {
-  height: 100%;
-}
+    html {
+      height: 100%;
+    }
 
-body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  min-height: 100%;
-  font-family: Arial, sans-serif;
-  font-size: 16px;
-  background: #e5ddd5;
-}
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      background: #e5ddd5;
+    }
 
-#chatScreen {
-  height: 100vh;
-  height: 100dvh;
-  display: none;
-  flex-direction: column;
-  overflow: hidden;
-}
+    #chatScreen {
+      height: 100vh;
+      height: 100dvh;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
 
-#chatScreen .chatHeader {
-  flex-shrink: 0;
-}
+    #chatScreen .chatHeader {
+      flex-shrink: 0;
+    }
 
-#chatScreen #messages {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 12px;
-  padding-bottom: 16px;
-}
+    #chatScreen #messages {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 12px;
+      padding-bottom: 16px;
+    }
 
-#chatScreen .bottom {
-  position: static;
-  flex-shrink: 0;
-  width: 100%;
-  padding: 8px;
-  padding-bottom: max(8px, env(safe-area-inset-bottom));
-}
+    #chatScreen .bottom {
+      position: static;
+      flex-shrink: 0;
+      width: 100%;
+      padding: 8px;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+    }
 
-#messageInput {
-  font-size: 16px;
-  min-height: 44px;
-}
+    #messageInput {
+      font-size: 16px;
+      min-height: 44px;
+    }
 
-#sendButton {
-  font-size: 16px;
-  min-height: 44px;
-}
-    
+    #sendButton {
+      font-size: 16px;
+      min-height: 44px;
+    }
 
     .header {
       background: #128C7E;
@@ -131,7 +129,6 @@ body {
     }
 
     /* PROFILE */
-
     .profileBox {
       background: white;
       margin: 10px;
@@ -177,7 +174,6 @@ body {
     }
 
     /* CHAT */
-
     .chatHeader {
       background: #128C7E;
       color: white;
@@ -311,6 +307,7 @@ body {
     }
   </style>
 </head>
+
 <!-- CALL SCREEN -->
 <div id="callScreen"
   style="
@@ -325,6 +322,8 @@ body {
   ">
 
   <h2 id="callTitle">Calling...</h2>
+
+  <audio id="remoteAudio" autoplay></audio>
 
   <video id="remoteVideo"
     autoplay
@@ -418,52 +417,41 @@ body {
 
 <body>
 
-<!-- MOBILE OTP LOGIN -->
+<!-- EMAIL & PASSWORD LOGIN SCREEN -->
 
 <div id="loginScreen"
      style="padding:20px;background:white;min-height:100vh">
 
   <h2>MyChat Login</h2>
-  <p>मोबाइल नंबर से लॉगिन करें</p>
+  <p>Email और Password से लॉगिन करें</p>
 
-  <label for="loginPhone">मोबाइल नंबर (+91)</label>
-
+  <label for="loginEmail">Email Address</label>
   <input
-    id="loginPhone"
-    type="tel"
-    inputmode="tel"
-    placeholder="10 अंकों का मोबाइल नंबर"
-    maxlength="13"
-    style="width:100%;padding:12px;margin:8px 0">
+    id="loginEmail"
+    type="email"
+    placeholder="अपना ईमेल डालें (उदा: example@gmail.com)"
+    style="width:100%;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:6px">
 
-  <div id="recaptcha-container"
-       style="margin:12px 0"></div>
+  <label for="loginPassword">Password</label>
+  <input
+    id="loginPassword"
+    type="password"
+    placeholder="पासवर्ड डालें (कम से कम 6 अक्षर)"
+    style="width:100%;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:6px">
 
-  <button id="sendOtpButton"
-    onclick="sendOTP()"
-    style="padding:12px 20px;background:#128C7E;color:white;border:0;border-radius:6px">
-    OTP भेजें
-  </button>
-
-  <div id="otpSection" style="display:none">
-
-    <input
-      id="loginOTP"
-      type="text"
-      inputmode="numeric"
-      autocomplete="one-time-code"
-      placeholder="SMS में आया OTP डालें"
-      maxlength="6"
-      style="width:100%;padding:12px;margin:12px 0">
-
-    <button onclick="verifyOTP()"
-      style="padding:12px 20px;background:#128C7E;color:white;border:0;border-radius:6px">
-      OTP Verify करके Login करें
+  <div style="display:flex;gap:10px;margin-top:12px">
+    <button onclick="loginWithEmail()"
+      style="flex:1;padding:12px;background:#128C7E;color:white;border:0;border-radius:6px;font-size:16px">
+      Login करें
     </button>
 
+    <button onclick="signUpWithEmail()"
+      style="flex:1;padding:12px;background:#075E54;color:white;border:0;border-radius:6px;font-size:16px">
+      नया अकाउंट बनाएं
+    </button>
   </div>
 
-  <p id="loginStatus"></p>
+  <p id="loginStatus" style="margin-top:15px;color:#128C7E;font-weight:bold"></p>
 
 </div>
 
@@ -482,7 +470,6 @@ body {
     </button>
 
   </div>
-
 
   <!-- MY PROFILE -->
 
@@ -519,7 +506,6 @@ body {
 
   </div>
 
-
   <div id="status"
        style="padding:15px;text-align:center">
     Users लोड हो रहे हैं...
@@ -553,17 +539,17 @@ body {
       <div id="chatOnlineStatus">
         Offline
       </div>
-      <button onclick="startAudioCall()"
-  style="background:white;border:0;border-radius:6px;padding:8px;font-size:18px">
-  📞
-</button>
-
-<button onclick="startVideoCall()"
-  style="background:white;border:0;border-radius:6px;padding:8px;font-size:18px">
-  📹
-</button>
-
     </div>
+
+    <button onclick="startAudioCall()"
+      style="background:white;border:0;border-radius:6px;padding:8px;font-size:18px">
+      📞
+    </button>
+
+    <button onclick="startVideoCall()"
+      style="background:white;border:0;border-radius:6px;padding:8px;font-size:18px">
+      📹
+    </button>
 
   </div>
 
@@ -600,18 +586,15 @@ body {
 
 <script type="module">
 
-  
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
 
 import {
   getAuth,
   onAuthStateChanged,
   signOut,
-  signInWithPhoneNumber,
-  RecaptchaVerifier
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
-  
-
 
 import {
   getDatabase,
@@ -625,565 +608,250 @@ import {
   update
 } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
 
-
-
-/* FIREBASE */
+/* FIREBASE CONFIG */
 
 const firebaseConfig = {
-
   apiKey: "AIzaSyDJlc0BcaRyPtdFb9d-SNOPqwwuf2BylwU",
-
   authDomain: "mychat-8ab46.firebaseapp.com",
-
-  databaseURL:
-  "https://mychat-8ab46-default-rtdb.asia-southeast1.firebasedatabase.app",
-
+  databaseURL: "https://mychat-8ab46-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "mychat-8ab46",
-
   storageBucket: "mychat-8ab46.firebasestorage.app",
-
   messagingSenderId: "186347252945",
-
   appId: "1:186347252945:web:e901cc8c5a16339e1a29f0"
-
 };
 
-
-const app =
-  initializeApp(firebaseConfig);
-
-const auth =
-  getAuth(app);
-
-const db =
-  getDatabase(app);
-
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
 let currentUser = null;
 let selectedUser = null;
 let chatId = "";
 let profilePhotoData = "";
 
+/* EMAIL & PASSWORD LOGIN FUNCTIONS */
 
-
-/* PHONE OTP LOGIN */
-
-let confirmationResult = null;
-let recaptchaVerifier = null;
-
-window.sendOTP = async function() {
-  const input = document.getElementById("loginPhone");
+window.signUpWithEmail = async function() {
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value.trim();
   const status = document.getElementById("loginStatus");
 
-  let phone = input.value.trim().replace(/[\s()-]/g, "");
-
-  if (/^\d{10}$/.test(phone)) {
-    phone = "+91" + phone;
-  }
-
-  if (!/^\+\d{10,15}$/.test(phone)) {
-    status.innerText = "सही मोबाइल नंबर और country code डालें।";
+  if (!email || !password) {
+    status.innerText = "कृपया ईमेल और पासवर्ड दोनों भरें।";
     return;
   }
 
-  status.innerText = "OTP भेजा जा रहा है...";
+  status.innerText = "अकाउंट बन रहा है...";
 
   try {
-    if (!recaptchaVerifier) {
-      recaptchaVerifier = new RecaptchaVerifier(
-        auth,
-        "recaptcha-container",
-        { size: "normal" }
-      );
-    }
-
-    confirmationResult = await signInWithPhoneNumber(
-      auth,
-      phone,
-      recaptchaVerifier
-    );
-
-    document.getElementById("otpSection").style.display = "block";
-    status.innerText = "OTP SMS से भेज दिया गया है।";
+    await createUserWithEmailAndPassword(auth, email, password);
+    status.innerText = "अकाउंट सफलतापूर्वक बन गया!";
   } catch (error) {
-    status.innerText = "OTP Error: " + error.message;
-
-    if (recaptchaVerifier) {
-      recaptchaVerifier.clear();
-      recaptchaVerifier = null;
-    }
+    status.innerText = "Sign Up Error: " + error.message;
   }
 };
 
-window.verifyOTP = async function() {
-  const code = document.getElementById("loginOTP").value.trim();
+window.loginWithEmail = async function() {
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value.trim();
   const status = document.getElementById("loginStatus");
 
-  if (!confirmationResult) {
-    status.innerText = "पहले OTP भेजें।";
+  if (!email || !password) {
+    status.innerText = "कृपया ईमेल और पासवर्ड दोनों भरें।";
     return;
   }
 
-  if (!/^\d{6}$/.test(code)) {
-    status.innerText = "6 अंकों का OTP डालें।";
-    return;
-  }
-
-  status.innerText = "OTP जाँचा जा रहा है...";
+  status.innerText = "लॉगिन हो रहा है...";
 
   try {
-    await confirmationResult.confirm(code);
-    status.innerText = "Login सफल हुआ!";
+    await signInWithEmailAndPassword(auth, email, password);
+    status.innerText = "लॉगिन सफल हुआ!";
   } catch (error) {
-    status.innerText = "OTP Error: " + error.message;
+    status.innerText = "Login Error: " + error.message;
   }
 };
-
 
 /* LOGOUT */
 
 window.logout = async function() {
   try {
     await signOut(auth);
-    alert("Logout सफल हुआ। अब दूसरे अकाउंट से Login करें।");
+    alert("Logout सफल हुआ।");
   } catch (error) {
     alert("Logout Error: " + error.message);
   }
 };
 
+/* AUTH STATE */
 
-
-/* AUTH */
-
-onAuthStateChanged(
-  auth,
-  function(user) {
-
-    if (!user) {
-
-      currentUser = null;
-
-      document.getElementById(
-        "loginScreen"
-      ).style.display = "block";
-
-      document.getElementById(
-        "userScreen"
-      ).style.display = "none";
-
-      document.getElementById(
-        "chatScreen"
-      ).style.display = "none";
-
-      return;
-    }
-
-
-    currentUser = user;
-
-
-    document.getElementById(
-      "loginScreen"
-    ).style.display = "none";
-
-    document.getElementById(
-      "userScreen"
-    ).style.display = "block";
-
-    document.getElementById(
-      "chatScreen"
-    ).style.display = "none";
-
-
-    setOnlineStatus();
-
-    loadMyProfile();
-
-    watchUsers();
-    watchIncomingCalls();
-
+onAuthStateChanged(auth, function(user) {
+  if (!user) {
+    currentUser = null;
+    document.getElementById("loginScreen").style.display = "block";
+    document.getElementById("userScreen").style.display = "none";
+    document.getElementById("chatScreen").style.display = "none";
+    return;
   }
-);
 
+  currentUser = user;
+
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("userScreen").style.display = "block";
+  document.getElementById("chatScreen").style.display = "none";
+
+  setOnlineStatus();
+  loadMyProfile();
+  watchUsers();
+  watchIncomingCalls();
+});
 
 /* ONLINE / OFFLINE */
 
 async function setOnlineStatus() {
-
   if (!currentUser) return;
 
+  const myStatusRef = ref(db, "users/" + currentUser.uid + "/online");
+  const connectedRef = ref(db, ".info/connected");
 
-  const myStatusRef =
-    ref(
-      db,
-      "users/" +
-      currentUser.uid +
-      "/online"
-    );
+  onValue(connectedRef, async function(snapshot) {
+    if (snapshot.val() !== true) return;
 
-
-  const connectedRef =
-    ref(
-      db,
-      ".info/connected"
-    );
-
-
-  onValue(
-    connectedRef,
-    async function(snapshot) {
-
-      if (snapshot.val() !== true) {
-
-        return;
-
-      }
-
-
-      await onDisconnect(
-        myStatusRef
-      ).set(false);
-
-
-      await set(
-        myStatusRef,
-        true
-      );
-
-    }
-  );
-
+    await onDisconnect(myStatusRef).set(false);
+    await set(myStatusRef, true);
+  });
 }
-
 
 /* WATCH USERS */
 
 function watchUsers() {
-
-  const usersRef =
-    ref(db, "users");
-
-
-  onValue(
-    usersRef,
-    function(snapshot) {
-
-      displayUsers(snapshot);
-
-    }
-  );
-
+  const usersRef = ref(db, "users");
+  onValue(usersRef, function(snapshot) {
+    displayUsers(snapshot);
+  });
 }
-
 
 /* DISPLAY USERS */
 
 function displayUsers(snapshot) {
-
-  const status =
-    document.getElementById("status");
-
-
-  const usersBox =
-    document.getElementById("users");
-
-
+  const status = document.getElementById("status");
+  const usersBox = document.getElementById("users");
   usersBox.innerHTML = "";
-
 
   let found = false;
 
+  snapshot.forEach(function(child) {
+    const user = {
+      ...child.val(),
+      uid: child.key
+    };
 
-  snapshot.forEach(
-    function(child) {
+    if (currentUser && user.uid !== currentUser.uid) {
+      found = true;
 
-     const user = {
-  ...child.val(),
-  uid: child.key
-};
+      const div = document.createElement("div");
+      div.className = "user";
 
-      if (
-        currentUser &&
-        user.uid !== currentUser.uid
-      ) {
+      const photo = user.photo || "https://via.placeholder.com/55";
+      const onlineText = user.online === true ? "🟢 Online" : "⚪ Offline";
+      const onlineClass = user.online === true ? "online" : "offline";
 
-        found = true;
+      div.innerHTML = `
+        <img class="profilePhoto" src="${photo}">
+        <div class="userInfo">
+          <b>${user.name || "User"}</b>
+          <div class="email">${user.email || ""}</div>
+          <div class="onlineStatus ${onlineClass}">${onlineText}</div>
+        </div>
+        <button class="chatButton">Chat</button>
+      `;
 
+      div.querySelector(".chatButton").onclick = function() {
+        openChat(user);
+      };
 
-        const div =
-          document.createElement("div");
-
-
-        div.className =
-          "user";
-
-
-        const photo =
-          user.photo ||
-          "https://via.placeholder.com/55";
-
-
-        const onlineText =
-          user.online === true
-            ? "🟢 Online"
-            : "⚪ Offline";
-
-
-        const onlineClass =
-          user.online === true
-            ? "online"
-            : "offline";
-
-
-        div.innerHTML = `
-
-          <img
-            class="profilePhoto"
-            src="${photo}">
-
-          <div class="userInfo">
-
-            <b>
-              ${user.name || "User"}
-            </b>
-
-            <div class="email">
-              ${user.email || ""}
-            </div>
-
-            <div class="onlineStatus ${onlineClass}">
-              ${onlineText}
-            </div>
-
-          </div>
-
-          <button class="chatButton">
-            Chat
-          </button>
-
-        `;
-
-
-        div.querySelector(
-          ".chatButton"
-        ).onclick =
-        function() {
-
-          openChat(user);
-
-        };
-
-
-        usersBox.appendChild(div);
-
-      }
-
+      usersBox.appendChild(div);
     }
-  );
-
+  });
 
   if (!found) {
-
-    status.innerText =
-      "दूसरा User अभी नहीं है";
-
+    status.innerText = "दूसरा User अभी नहीं है";
   } else {
-
     status.innerText = "";
-
   }
-
 }
-
 
 /* LOAD MY PROFILE */
 
 async function loadMyProfile() {
-
   try {
-
-    const snapshot =
-      await get(
-        ref(
-          db,
-          "users/" +
-          currentUser.uid
-        )
-      );
-
-
+    const snapshot = await get(ref(db, "users/" + currentUser.uid));
     if (snapshot.exists()) {
-
-      const user =
-        snapshot.val();
-
-
-      document.getElementById(
-        "profileName"
-      ).value =
-        user.name || "";
-
-
+      const user = snapshot.val();
+      document.getElementById("profileName").value = user.name || "";
       if (user.photo) {
-
-        profilePhotoData =
-          user.photo;
-
-        document.getElementById(
-          "myProfilePhoto"
-        ).src =
-          user.photo;
-
+        profilePhotoData = user.photo;
+        document.getElementById("myProfilePhoto").src = user.photo;
       }
-
     }
-
   } catch(error) {
-
-    document.getElementById(
-      "profileStatus"
-    ).innerText =
-      "Profile Load Error: " +
-      error.message;
-
+    document.getElementById("profileStatus").innerText = "Profile Load Error: " + error.message;
   }
-
 }
-
 
 /* SELECT PROFILE PHOTO */
 
-window.selectProfilePhoto =
-function(event) {
-
-  const file =
-    event.target.files[0];
-
-
+window.selectProfilePhoto = function(event) {
+  const file = event.target.files[0];
   if (!file) return;
 
-
   if (file.size > 500 * 1024) {
-
-    alert(
-      "Profile Photo 500 KB से छोटी रखें।"
-    );
-
+    alert("Profile Photo 500 KB से छोटी रखें।");
     event.target.value = "";
-
     return;
-
   }
 
-
-  const reader =
-    new FileReader();
-
-
-  reader.onload =
-  function() {
-
-    profilePhotoData =
-      reader.result;
-
-
-    document.getElementById(
-      "myProfilePhoto"
-    ).src =
-      profilePhotoData;
-
+  const reader = new FileReader();
+  reader.onload = function() {
+    profilePhotoData = reader.result;
+    document.getElementById("myProfilePhoto").src = profilePhotoData;
   };
-
-
   reader.readAsDataURL(file);
-
 };
-
 
 /* SAVE PROFILE */
 
-window.saveProfile =
-async function() {
-
-  const name =
-    document.getElementById(
-      "profileName"
-    ).value.trim();
-
-
-  const status =
-    document.getElementById(
-      "profileStatus"
-    );
-
+window.saveProfile = async function() {
+  const name = document.getElementById("profileName").value.trim();
+  const status = document.getElementById("profileStatus");
 
   if (!name) {
-
-    status.innerText =
-      "पहले अपना नाम लिखें";
-
+    status.innerText = "पहले अपना नाम लिखें";
     return;
-
   }
 
-
-  status.innerText =
-    "Profile Save हो रही है...";
-
+  status.innerText = "Profile Save हो रही है...";
 
   try {
+    await set(ref(db, "users/" + currentUser.uid), {
+      uid: currentUser.uid,
+      name: name,
+      email: currentUser.email,
+      photo: profilePhotoData || "",
+      online: true,
+      updatedAt: Date.now()
+    });
 
-    await set(
-      ref(
-        db,
-        "users/" +
-        currentUser.uid
-      ),
-      {
-
-        uid:
-          currentUser.uid,
-
-        name:
-          name,
-
-        email:
-          currentUser.email,
-
-        photo:
-          profilePhotoData || "",
-
-        online:
-          true,
-
-        updatedAt:
-          Date.now()
-
-      }
-    );
-
-
-    status.innerText =
-      "Profile Save हो गई ✓";
-
-
+    status.innerText = "Profile Save हो गई ✓";
   } catch(error) {
-
-    status.innerText =
-      "Profile Error: " +
-      error.message;
-
+    status.innerText = "Profile Error: " + error.message;
   }
-
 };
 
-
-/* BACK TO USERS — FIX */
+/* BACK TO USERS */
 
 function showUsersScreen() {
   document.getElementById("chatScreen").style.display = "none";
   document.getElementById("userScreen").style.display = "block";
-
   selectedUser = null;
   chatId = "";
 }
@@ -1202,16 +870,11 @@ window.addEventListener("popstate", function() {
   }
 });
 
-
-
-
-
 /* OPEN CHAT */
-
 
 window.openChat = function(user) {
   if (window.location.hash !== "#chat") {
-  window.history.pushState({ screen: "chat" }, "", "#chat");
+    window.history.pushState({ screen: "chat" }, "", "#chat");
   }
   if (!user || !user.uid) {
     alert("इस User की Firebase ID नहीं मिली।");
@@ -1223,403 +886,155 @@ window.openChat = function(user) {
     uid: String(user.uid)
   };
 
-  window.currentChatUser = selectedUser;
-  
+  document.getElementById("userScreen").style.display = "none";
+  document.getElementById("chatScreen").style.display = "block";
 
+  document.getElementById("chatName").innerText = user.name || user.email || "Chat";
+  document.getElementById("chatProfilePhoto").src = user.photo || "https://via.placeholder.com/40";
 
-  document.getElementById(
-    "userScreen"
-  ).style.display =
-    "none";
+  updateChatOnlineStatus(user.online);
 
-
-  document.getElementById(
-    "chatScreen"
-  ).style.display =
-    "block";
-
-
-  document.getElementById(
-    "chatName"
-  ).innerText =
-    user.name ||
-    user.email ||
-    "Chat";
-
-
-  document.getElementById(
-    "chatProfilePhoto"
-  ).src =
-    user.photo ||
-    "https://via.placeholder.com/40";
-
-
-  updateChatOnlineStatus(
-    user.online
-  );
-
-
-  const ids = [
-
-    currentUser.uid,
-    user.uid
-
-  ];
-
-
+  const ids = [currentUser.uid, user.uid];
   ids.sort();
+  chatId = ids[0] + "_" + ids[1];
 
-
-  chatId =
-    ids[0] +
-    "_" +
-    ids[1];
-
-
-  document.getElementById(
-    "messages"
-  ).innerHTML = "";
-
-
+  document.getElementById("messages").innerHTML = "";
   loadMessages();
-
 };
-
 
 /* CHAT ONLINE STATUS */
 
-function updateChatOnlineStatus(
-  isOnline
-) {
-
-  const status =
-    document.getElementById(
-      "chatOnlineStatus"
-    );
-
-
+function updateChatOnlineStatus(isOnline) {
+  const status = document.getElementById("chatOnlineStatus");
   if (isOnline === true) {
-
-    status.innerText =
-      "🟢 Online";
-
+    status.innerText = "🟢 Online";
   } else {
-
-    status.innerText =
-      "⚪ Offline";
-
+    status.innerText = "⚪ Offline";
   }
-
 }
-
 
 /* MESSAGES */
 
 function loadMessages() {
-
-  const messagesRef =
-    ref(
-      db,
-      "chats/" +
-      chatId +
-      "/messages"
-    );
-
-
-  onChildAdded(
-    messagesRef,
-    function(snapshot) {
-
-      showMessage(
-        snapshot.val()
-      );
-
-    }
-  );
-
+  const messagesRef = ref(db, "chats/" + chatId + "/messages");
+  onChildAdded(messagesRef, function(snapshot) {
+    showMessage(snapshot.val());
+  });
 }
-
 
 /* SHOW MESSAGE */
 
 function showMessage(message) {
+  const row = document.createElement("div");
+  const box = document.createElement("div");
+  const mine = message.senderId === currentUser.uid;
 
-  const row =
-    document.createElement("div");
-
-
-  const box =
-    document.createElement("div");
-
-
-  const mine =
-    message.senderId ===
-    currentUser.uid;
-
-
-  row.className =
-    mine
-      ? "messageRow myRow"
-      : "messageRow otherRow";
-
-
-  box.className =
-    mine
-      ? "message myMessage"
-      : "message";
-
+  row.className = mine ? "messageRow myRow" : "messageRow otherRow";
+  box.className = mine ? "message myMessage" : "message";
 
   if (message.type === "photo") {
-
-    const image =
-      document.createElement("img");
-
-
-    image.src =
-      message.photo;
-
-
-    image.className =
-      "chatPhoto";
-
-
+    const image = document.createElement("img");
+    image.src = message.photo;
+    image.className = "chatPhoto";
     box.appendChild(image);
-
   }
-
 
   if (message.type !== "photo") {
-
-    box.innerText =
-      message.text || "";
-
+    box.innerText = message.text || "";
   }
 
-
-  const time =
-    document.createElement("div");
-
-
-  time.className =
-    "messageTime";
-
-
-  time.innerText =
-    new Date(
-      message.time
-    ).toLocaleTimeString(
-      [],
-      {
-        hour: "2-digit",
-        minute: "2-digit"
-      }
-    );
-
+  const time = document.createElement("div");
+  time.className = "messageTime";
+  time.innerText = new Date(message.time).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
 
   box.appendChild(time);
-
-
   row.appendChild(box);
+  document.getElementById("messages").appendChild(row);
 
-
-  document.getElementById(
-    "messages"
-  ).appendChild(row);
-
-
-  window.scrollTo(
-    0,
-    document.body.scrollHeight
-  );
-
+  window.scrollTo(0, document.body.scrollHeight);
 }
-
 
 /* SEND TEXT */
 
-window.sendMessage =
-async function() {
-
-  const input =
-    document.getElementById(
-      "messageInput"
-    );
-
-
-  const text =
-    input.value.trim();
-
+window.sendMessage = async function() {
+  const input = document.getElementById("messageInput");
+  const text = input.value.trim();
 
   if (!text) return;
-
-
   if (!selectedUser) {
-
-    alert(
-      "पहले Chat खोलें"
-    );
-
+    alert("पहले Chat खोलें");
     return;
-
   }
-
 
   try {
-
-    await push(
-      ref(
-        db,
-        "chats/" +
-        chatId +
-        "/messages"
-      ),
-      {
-
-        type:
-          "text",
-
-        text:
-          text,
-
-        senderId:
-          currentUser.uid,
-
-        senderName:
-          currentUser.email,
-
-        time:
-          Date.now()
-
-      }
-    );
-
-
+    await push(ref(db, "chats/" + chatId + "/messages"), {
+      type: "text",
+      text: text,
+      senderId: currentUser.uid,
+      senderName: currentUser.email,
+      time: Date.now()
+    });
     input.value = "";
-
-
   } catch(error) {
-
-    alert(
-      "Message Error: " +
-      error.message
-    );
-
+    alert("Message Error: " + error.message);
   }
-
 };
 
+window.handleEnter = function(event) {
+  if (event.key === "Enter") {
+    sendMessage();
+  }
+};
 
 /* SEND PHOTO */
 
-window.sendPhoto =
-function(event) {
-
-  const file =
-    event.target.files[0];
-
-
+window.sendPhoto = function(event) {
+  const file = event.target.files[0];
   if (!file) return;
 
-
   if (!selectedUser) {
-
-    alert(
-      "पहले Chat खोलें"
-    );
-
+    alert("पहले Chat खोलें");
     event.target.value = "";
-
     return;
-
   }
-
 
   if (file.size > 700 * 1024) {
-
-    alert(
-      "Photo 700 KB से छोटी रखें।"
-    );
-
+    alert("Photo 700 KB से छोटी रखें।");
     event.target.value = "";
-
     return;
-
   }
 
+  const status = document.getElementById("photoStatus");
+  status.innerText = "Photo भेजी जा रही है...";
+  status.style.display = "block";
 
-  const status =
-    document.getElementById(
-      "photoStatus"
-    );
-
-
-  status.innerText =
-    "Photo भेजी जा रही है...";
-
-
-  status.style.display =
-    "block";
-
-
-  const reader =
-    new FileReader();
-
-
-  reader.onload =
-  async function() {
-
+  const reader = new FileReader();
+  reader.onload = async function() {
     try {
+      await push(ref(db, "chats/" + chatId + "/messages"), {
+        type: "photo",
+        photo: reader.result,
+        senderId: currentUser.uid,
+        senderName: currentUser.email,
+        time: Date.now()
+      });
 
-      await push(
-        ref(
-          db,
-          "chats/" +
-          chatId +
-          "/messages"
-        ),
-        {
-
-          type:
-            "photo",
-
-          photo:
-            reader.result,
-
-          senderId:
-            currentUser.uid,
-
-          senderName:
-            currentUser.email,
-
-          time:
-            Date.now()
-
-        }
-      );
-
-
-      status.innerText =
-        "Photo भेज दी गई ✓";
-
-
-      
+      status.innerText = "Photo भेज दी गई ✓";
       setTimeout(function() {
         status.style.display = "none";
       }, 3000);
-
     } catch(error) {
       status.innerText = "Photo Error: " + error.message;
     }
-
     event.target.value = "";
-
   };
-
   reader.readAsDataURL(file);
-  };
-  
-  
-/* AUDIO AND VIDEO CALLS */
+};
+
+/* CALLS CONFIG */
 
 let activeCallId = null;
 let activeCallRole = null;
@@ -1632,27 +1047,19 @@ let callWatchUnsub = null;
 let remoteCandidatesUnsub = null;
 
 const callConfig = {
-  iceServers: [
-    { urls: "stun:stun.l.google.com:19302" }
-  ]
+  iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
 };
 
 function showCallScreen(type) {
   document.getElementById("callScreen").style.display = "block";
-  document.getElementById("remoteVideo").style.display =
-    type === "video" ? "block" : "none";
-  document.getElementById("localVideo").style.display =
-    type === "video" ? "block" : "none";
-  document.getElementById("callTitle").innerText =
-    type === "video" ? "Video Call" : "Audio Call";
+  document.getElementById("remoteVideo").style.display = type === "video" ? "block" : "none";
+  document.getElementById("localVideo").style.display = type === "video" ? "block" : "none";
+  document.getElementById("callTitle").innerText = type === "video" ? "Video Call" : "Audio Call";
 }
 
 async function prepareCall(type, callId, role) {
-  if (!navigator.mediaDevices ||
-      !navigator.mediaDevices.getUserMedia) {
-    throw new Error(
-      "Camera/Microphone unavailable. Open MyChat on HTTPS."
-    );
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    throw new Error("Camera/Microphone unavailable.");
   }
 
   localCallStream = await navigator.mediaDevices.getUserMedia({
@@ -1678,12 +1085,9 @@ async function prepareCall(type, callId, role) {
   callPeer.onicecandidate = async function(event) {
     if (event.candidate) {
       try {
-        await push(
-          ref(db, "callCandidates/" + callId + "/" + role),
-          event.candidate.toJSON()
-        );
+        await push(ref(db, "callCandidates/" + callId + "/" + role), event.candidate.toJSON());
       } catch (error) {
-        console.log("ICE candidate error:", error.message);
+        console.log("ICE error:", error.message);
       }
     }
   };
@@ -1692,48 +1096,30 @@ async function prepareCall(type, callId, role) {
 function listenRemoteCandidates(callId, remoteRole) {
   if (remoteCandidatesUnsub) remoteCandidatesUnsub();
 
-  remoteCandidatesUnsub = onChildAdded(
-    ref(db, "callCandidates/" + callId + "/" + remoteRole),
-    async function(snapshot) {
-      if (!callPeer || !callPeer.remoteDescription) return;
-
-      try {
-        await callPeer.addIceCandidate(
-          new RTCIceCandidate(snapshot.val())
-        );
-      } catch (error) {
-        console.log("Remote candidate error:", error.message);
-      }
+  remoteCandidatesUnsub = onChildAdded(ref(db, "callCandidates/" + callId + "/" + remoteRole), async function(snapshot) {
+    if (!callPeer || !callPeer.remoteDescription) return;
+    try {
+      await callPeer.addIceCandidate(new RTCIceCandidate(snapshot.val()));
+    } catch (error) {
+      console.log("Candidate error:", error.message);
     }
-  );
+  });
 }
 
-window.startAudioCall = function() {
-  startCall("audio");
-};
-
-window.startVideoCall = function() {
-  startCall("video");
-};
+window.startAudioCall = function() { startCall("audio"); };
+window.startVideoCall = function() { startCall("video"); };
 
 async function startCall(type) {
-  if (!currentUser || !selectedUser || !currentUser.uid || !selectedUser.uid) {
-alert("User की जानकारी नहीं मिली। वापस जाकर दूसरे User की Chat फिर से खोलें।");
-return;
-}
-
-if (selectedUser.uid === currentUser.uid) {
-alert("दूसरे अलग अकाउंट को Call करें।");
-return;
-}
-
-  if (selectedUser.uid === currentUser.uid) {
-    alert("दूसरे अलग अकाउंट को Call करें।");
+  if (!currentUser || !selectedUser) {
+    alert("User की जानकारी नहीं मिली।");
     return;
   }
-
+  if (selectedUser.uid === currentUser.uid) {
+    alert("खुद को कॉल नहीं कर सकते।");
+    return;
+  }
   if (callPeer) {
-    alert("पहले चल रही Call समाप्त करें।");
+    alert("पहले चल रही कॉल समाप्त करें।");
     return;
   }
 
@@ -1748,39 +1134,29 @@ return;
       callerId: currentUser.uid,
       calleeId: selectedUser.uid,
       type: type,
-      status: "preparing",
+      status: "ringing",
       createdAt: Date.now()
     });
 
     showCallScreen(type);
-    document.getElementById("callTitle").innerText = "Calling...";
-
     await prepareCall(type, activeCallId, "caller");
 
     const offer = await callPeer.createOffer();
     await callPeer.setLocalDescription(offer);
 
     await update(callRef, {
-      offer: {
-        type: offer.type,
-        sdp: offer.sdp
-      },
-      status: "ringing"
+      offer: { type: offer.type, sdp: offer.sdp }
     });
 
     callWatchUnsub = onValue(callRef, async function(snapshot) {
       const data = snapshot.val();
       if (!data) return;
 
-      if (data.answer && callPeer &&
-          !callPeer.currentRemoteDescription) {
+      if (data.answer && callPeer && !callPeer.currentRemoteDescription) {
         try {
-          await callPeer.setRemoteDescription(
-            new RTCSessionDescription(data.answer)
-          );
+          await callPeer.setRemoteDescription(new RTCSessionDescription(data.answer));
           listenRemoteCandidates(activeCallId, "callee");
-          document.getElementById("callTitle").innerText =
-            "Call connected";
+          document.getElementById("callTitle").innerText = "Call connected";
         } catch (error) {
           console.log("Answer error:", error.message);
         }
@@ -1790,14 +1166,11 @@ return;
         cleanupCall();
       }
     });
-
   } catch (error) {
     alert("Call Error: " + error.message);
     cleanupCall();
   }
 }
-
-/* INCOMING CALL LISTENER */
 
 function watchIncomingCalls() {
   if (incomingCallsUnsub) return;
@@ -1807,17 +1180,9 @@ function watchIncomingCalls() {
 
     snapshot.forEach(function(child) {
       const data = child.val();
-
-      if (
-        data.calleeId === currentUser.uid &&
-        data.callerId !== currentUser.uid &&
-        data.status === "ringing" &&
-        !callPeer
-      ) {
+      if (data.calleeId === currentUser.uid && data.callerId !== currentUser.uid && data.status === "ringing" && !callPeer) {
         incomingCallId = child.key;
-        document.getElementById("incomingCallTitle").innerText =
-          (data.type === "video" ? "Video" : "Audio") +
-          " Call incoming";
+        document.getElementById("incomingCallTitle").innerText = (data.type === "video" ? "Video" : "Audio") + " Call incoming";
         document.getElementById("incomingCall").style.display = "block";
       }
     });
@@ -1826,48 +1191,37 @@ function watchIncomingCalls() {
 
 window.answerCall = async function() {
   if (!incomingCallId) return;
-
-  const callId = incomingCallId;
-  const callRef = ref(db, "calls/" + callId);
+  const callRef = ref(db, "calls/" + incomingCallId);
 
   try {
     const snapshot = await get(callRef);
     const data = snapshot.val();
-
     if (!data || data.status !== "ringing") {
-      alert("यह Call अब उपलब्ध नहीं है।");
+      alert("यह कॉल अब उपलब्ध नहीं है।");
       cleanupCall();
       return;
     }
 
-    activeCallId = callId;
+    activeCallId = incomingCallId;
     activeCallRole = "callee";
     activeCallType = data.type || "audio";
 
     document.getElementById("incomingCall").style.display = "none";
     showCallScreen(activeCallType);
 
-    await prepareCall(activeCallType, callId, "callee");
-
-    await callPeer.setRemoteDescription(
-      new RTCSessionDescription(data.offer)
-    );
-
-    listenRemoteCandidates(callId, "caller");
+    await prepareCall(activeCallType, activeCallId, "callee");
+    await callPeer.setRemoteDescription(new RTCSessionDescription(data.offer));
+    listenRemoteCandidates(activeCallId, "caller");
 
     const answer = await callPeer.createAnswer();
     await callPeer.setLocalDescription(answer);
 
     await update(callRef, {
-      answer: {
-        type: answer.type,
-        sdp: answer.sdp
-      },
+      answer: { type: answer.type, sdp: answer.sdp },
       status: "answered"
     });
 
     document.getElementById("callTitle").innerText = "Call connected";
-
   } catch (error) {
     alert("Answer Error: " + error.message);
     cleanupCall();
@@ -1877,38 +1231,25 @@ window.answerCall = async function() {
 window.rejectCall = async function() {
   if (incomingCallId) {
     try {
-      await update(ref(db, "calls/" + incomingCallId), {
-        status: "rejected"
-      });
-    } catch (error) {
-      console.log(error.message);
-    }
+      await update(ref(db, "calls/" + incomingCallId), { status: "rejected" });
+    } catch (e) {}
   }
-
   document.getElementById("incomingCall").style.display = "none";
   incomingCallId = null;
 };
 
 window.endCall = async function() {
-  const callId = activeCallId;
-
-  if (callId) {
+  if (activeCallId) {
     try {
-      await update(ref(db, "calls/" + callId), {
-        status: "ended"
-      });
-    } catch (error) {
-      console.log(error.message);
-    }
+      await update(ref(db, "calls/" + activeCallId), { status: "ended" });
+    } catch (e) {}
   }
-
   cleanupCall();
 };
 
 function cleanupCall() {
   if (callWatchUnsub) callWatchUnsub();
   if (remoteCandidatesUnsub) remoteCandidatesUnsub();
-
   callWatchUnsub = null;
   remoteCandidatesUnsub = null;
 
@@ -1916,59 +1257,26 @@ function cleanupCall() {
   callPeer = null;
 
   if (localCallStream) {
-    localCallStream.getTracks().forEach(function(track) {
-      track.stop();
-    });
+    localCallStream.getTracks().forEach(track => track.stop());
   }
   localCallStream = null;
 
   document.getElementById("callScreen").style.display = "none";
   document.getElementById("incomingCall").style.display = "none";
-  document.getElementById("remoteAudio").srcObject = null;
-  document.getElementById("remoteVideo").srcObject = null;
-  document.getElementById("localVideo").srcObject = null;
-
   activeCallId = null;
   activeCallRole = null;
   incomingCallId = null;
 }
 
-/* START LISTENING AFTER LOGIN */
-
-window.startAudioCall = function() {
-  startCall("audio");
-};
-
 </script>
 
-<!-- MyChat Call Screens -->
-<div id="callScreen" style="display:none;position:fixed;inset:0;background:#111;color:white;z-index:9999;text-align:center;padding:20px">
-  <h2 id="callTitle">Calling...</h2>
-  <audio id="remoteAudio" autoplay></audio>
-  <video id="remoteVideo" autoplay playsinline style="display:none;width:100%;max-height:60vh;background:#222"></video>
-  <video id="localVideo" autoplay muted playsinline style="display:none;width:110px;position:absolute;right:15px;top:80px"></video>
-  <button onclick="endCall()" style="margin-top:25px;padding:18px;background:#e53935;color:white;border:0;border-radius:50%">📵</button>
-</div>
-
-<div id="incomingCall" style="display:none;position:fixed;inset:0;background:#222;color:white;z-index:10000;text-align:center;padding-top:100px">
-  <h2 id="incomingCallTitle">Incoming Call</h2>
-  <button onclick="answerCall()" style="padding:18px;background:#128C7E;color:white;border:0;border-radius:50%">📞</button>
-  <button onclick="rejectCall()" style="padding:18px;background:#e53935;color:white;border:0;border-radius:50%">❌</button>
-</div>
-  <script>
+<script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function() {
-    navigator.serviceWorker.register("./sw.js")
-      .then(function() {
-        console.log("Service Worker registered");
-      })
-      .catch(function(error) {
-        console.log("Service Worker error:", error);
-      });
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
   });
 }
-  </script>
-
+</script>
 
 </body>
 </html>
