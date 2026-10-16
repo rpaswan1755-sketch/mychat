@@ -308,31 +308,34 @@
   </style>
 </head>
 
-<!-- CALL SCREEN -->
-<div id="callScreen" style="display:none;position:fixed;inset:0;background:linear-gradient(135deg, #075E54, #128C7E);z-index:9999;color:white;text-align:center;padding:40px 20px;">
+<!-- CALL SCREEN (WhatsApp Style) -->
+<div id="callScreen" style="display:none;position:fixed;inset:0;background:#0b141a;z-index:9999;color:white;text-align:center;">
 
-  <h2 id="callTitle" style="font-size:22px; margin-bottom:10px;">Audio Call</h2>
-
-  <!-- सामने वाले की प्रोफाइल फोटो और नाम -->
-  <img id="callProfilePhoto" class="callProfilePhoto" src="https://via.placeholder.com/130" style="width:130px;height:130px;border-radius:50%;object-fit:cover;border:4px solid rgba(255,255,255,0.3);margin:30px auto 15px auto;display:block;background:#ddd;">
-  <div id="callUserName" style="font-size:26px;font-weight:bold;margin-top:10px;">User</div>
-  <div id="callTimer" style="font-size:16px;opacity:0.8;margin-top:5px;">Calling...</div>
-
-  <audio id="remoteAudio" autoplay></audio>
-
+  <!-- Remote Video (Full Screen background for video calls) -->
   <video id="remoteVideo"
     autoplay
     playsinline
     style="
-      display:none;
+      position:absolute;
+      inset:0;
       width:100%;
-      max-height:55vh;
+      height:100%;
+      object-fit:cover;
       background:#000;
-      border-radius:10px;
-      margin-top:15px;
+      display:none;
     ">
   </video>
 
+  <!-- Audio Call Background Content -->
+  <div id="audioCallContainer" style="padding-top:80px;height:100%;display:flex;flex-direction:column;align-items:center;">
+    <div id="callUserName" style="font-size:24px;font-weight:500;">User</div>
+    <div id="callTimer" style="font-size:15px;opacity:0.7;margin-top:6px;">Ringing...</div>
+    <img id="callProfilePhoto" class="callProfilePhoto" src="https://via.placeholder.com/130" style="width:120px;height:120px;border-radius:50%;object-fit:cover;margin-top:40px;background:#ddd;">
+  </div>
+
+  <audio id="remoteAudio" autoplay></audio>
+
+  <!-- Local Video Preview (Top Right) -->
   <video id="localVideo"
     autoplay
     muted
@@ -344,29 +347,20 @@
       object-fit:cover;
       position:absolute;
       right:15px;
-      top:80px;
+      top:40px;
       background:#333;
       border-radius:10px;
+      border:2px solid rgba(255,255,255,0.2);
+      z-index:10;
     ">
   </video>
 
-  <button onclick="endCall()"
-    style="
-      position: absolute;
-      bottom: 50px;
-      left: 50%;
-      transform: translateX(-50%);
-      background:#e53935;
-      color:white;
-      border:0;
-      border-radius:50%;
-      width:65px;
-      height:65px;
-      font-size:25px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    ">
-    📵
-  </button>
+  <!-- WhatsApp Style Call Bottom Controls -->
+  <div style="position:absolute; bottom:30px; left:0; right:0; display:flex; justify-content:center; align-items:center; gap:15px; z-index:20; padding:0 20px;">
+    <button onclick="toggleMute()" id="muteBtn" style="background:rgba(255,255,255,0.15);color:white;border:0;border-radius:50%;width:50px;height:50px;font-size:20px;">🎙️</button>
+    <button onclick="toggleVideoTrack()" id="videoToggleBtn" style="background:rgba(255,255,255,0.15);color:white;border:0;border-radius:50%;width:50px;height:50px;font-size:20px;display:none;">📹</button>
+    <button onclick="endCall()" style="background:#e53935;color:white;border:0;border-radius:50%;width:60px;height:60px;font-size:24px;box-shadow: 0 4px 10px rgba(0,0,0,0.3);">📞</button>
+  </div>
 
 </div>
 
@@ -939,9 +933,20 @@ function showMessage(message) {
     image.src = message.photo;
     image.className = "chatPhoto";
     box.appendChild(image);
-  }
-
-  if (message.type !== "photo") {
+  } else if (message.type === "call") {
+    const callDiv = document.createElement("div");
+    callDiv.style.display = "flex";
+    callDiv.style.alignItems = "center";
+    callDiv.style.gap = "8px";
+    callDiv.innerHTML = `
+      <span style="font-size:20px;">${message.callType === 'video' ? '📹' : '📞'}</span>
+      <div>
+        <b>${message.text}</b>
+        <div style="font-size:11px;color:#666;">${message.subText || ''}</div>
+      </div>
+    `;
+    box.appendChild(callDiv);
+  } else {
     box.innerText = message.text || "";
   }
 
@@ -1047,6 +1052,8 @@ let callPeer = null;
 let incomingCallsUnsub = null;
 let callWatchUnsub = null;
 let remoteCandidatesUnsub = null;
+let callStartTime = null;
+let callTimerInterval = null;
 
 const callConfig = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
@@ -1054,24 +1061,58 @@ const callConfig = {
 
 function showCallScreen(type) {
   document.getElementById("callScreen").style.display = "block";
+  activeCallType = type;
 
   if (type === "video") {
     document.getElementById("remoteVideo").style.display = "block";
     document.getElementById("localVideo").style.display = "block";
-    document.getElementById("callProfilePhoto").style.display = "none";
+    document.getElementById("audioCallContainer").style.display = "none";
+    document.getElementById("videoToggleBtn").style.display = "block";
   } else {
     document.getElementById("remoteVideo").style.display = "none";
     document.getElementById("localVideo").style.display = "none";
-    document.getElementById("callProfilePhoto").style.display = "block";
+    document.getElementById("audioCallContainer").style.display = "flex";
+    document.getElementById("videoToggleBtn").style.display = "none";
   }
-
-  document.getElementById("callTitle").innerText = type === "video" ? "Video Call" : "Audio Call";
 
   if (selectedUser) {
     document.getElementById("callUserName").innerText = selectedUser.name || selectedUser.email || "User";
     document.getElementById("callProfilePhoto").src = selectedUser.photo || "https://via.placeholder.com/130";
   }
+  startCallTimer();
 }
+
+function startCallTimer() {
+  callStartTime = Date.now();
+  if (callTimerInterval) clearInterval(callTimerInterval);
+  
+  callTimerInterval = setInterval(() => {
+    const seconds = Math.floor((Date.now() - callStartTime) / 1000);
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    document.getElementById("callTimer").innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  }, 1000);
+}
+
+window.toggleMute = function() {
+  if (!localCallStream) return;
+  const audioTrack = localCallStream.getAudioTracks()[0];
+  if (audioTrack) {
+    audioTrack.enabled = !audioTrack.enabled;
+    document.getElementById("muteBtn").style.background = audioTrack.enabled ? "rgba(255,255,255,0.15)" : "#fff";
+    document.getElementById("muteBtn").style.color = audioTrack.enabled ? "#fff" : "#000";
+  }
+};
+
+window.toggleVideoTrack = function() {
+  if (!localCallStream || activeCallType !== "video") return;
+  const videoTrack = localCallStream.getVideoTracks()[0];
+  if (videoTrack) {
+    videoTrack.enabled = !videoTrack.enabled;
+    document.getElementById("videoToggleBtn").style.background = videoTrack.enabled ? "rgba(255,255,255,0.15)" : "#fff";
+    document.getElementById("videoToggleBtn").style.color = videoTrack.enabled ? "#fff" : "#000";
+  }
+};
 
 async function prepareCall(type, callId, role) {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -1152,12 +1193,16 @@ async function startCall(type) {
     await set(callRef, {
       callerId: currentUser.uid,
       calleeId: selectedUser.uid,
+      chatId: chatId,
       type: type,
       status: "ringing",
       createdAt: Date.now()
     });
 
     showCallScreen(type);
+    document.getElementById("callTimer").innerText = "Ringing...";
+    if(callTimerInterval) clearInterval(callTimerInterval);
+
     await prepareCall(type, activeCallId, "caller");
 
     const offer = await callPeer.createOffer();
@@ -1175,7 +1220,7 @@ async function startCall(type) {
         try {
           await callPeer.setRemoteDescription(new RTCSessionDescription(data.answer));
           listenRemoteCandidates(activeCallId, "callee");
-          document.getElementById("callTitle").innerText = "Call connected";
+          startCallTimer();
         } catch (error) {
           console.log("Answer error:", error.message);
         }
@@ -1224,6 +1269,7 @@ window.answerCall = async function() {
     activeCallId = incomingCallId;
     activeCallRole = "callee";
     activeCallType = data.type || "audio";
+    chatId = data.chatId || chatId;
 
     document.getElementById("incomingCall").style.display = "none";
     showCallScreen(activeCallType);
@@ -1240,7 +1286,6 @@ window.answerCall = async function() {
       status: "answered"
     });
 
-    document.getElementById("callTitle").innerText = "Call connected";
   } catch (error) {
     alert("Answer Error: " + error.message);
     cleanupCall();
@@ -1250,7 +1295,23 @@ window.answerCall = async function() {
 window.rejectCall = async function() {
   if (incomingCallId) {
     try {
-      await update(ref(db, "calls/" + incomingCallId), { status: "rejected" });
+      const callRef = ref(db, "calls/" + incomingCallId);
+      const snap = await get(callRef);
+      if(snap.exists()) {
+        const data = snap.val();
+        // Log missed call
+        if(data.chatId) {
+          await push(ref(db, "chats/" + data.chatId + "/messages"), {
+            type: "call",
+            callType: data.type,
+            text: data.type === 'video' ? 'Video call' : 'Voice call',
+            subText: 'Missed call',
+            senderId: data.callerId,
+            time: Date.now()
+          });
+        }
+      }
+      await update(callRef, { status: "rejected" });
     } catch (e) {}
   }
   document.getElementById("incomingCall").style.display = "none";
@@ -1260,13 +1321,39 @@ window.rejectCall = async function() {
 window.endCall = async function() {
   if (activeCallId) {
     try {
-      await update(ref(db, "calls/" + activeCallId), { status: "ended" });
+      const callRef = ref(db, "calls/" + activeCallId);
+      const snap = await get(callRef);
+      if(snap.exists()) {
+        const data = snap.val();
+        let durationText = "No answer";
+        if(callStartTime && data.status === "answered") {
+          const secs = Math.floor((Date.now() - callStartTime) / 1000);
+          const mins = Math.floor(secs / 60);
+          const remainSecs = secs % 60;
+          durationText = `${mins > 0 ? mins + ' mins ' : ''}${remainSecs} secs`;
+        }
+
+        if(chatId) {
+          await push(ref(db, "chats/" + chatId + "/messages"), {
+            type: "call",
+            callType: activeCallType,
+            text: activeCallType === 'video' ? 'Video call' : 'Voice call',
+            subText: durationText,
+            senderId: currentUser.uid,
+            time: Date.now()
+          });
+        }
+      }
+      await update(callRef, { status: "ended" });
     } catch (e) {}
   }
   cleanupCall();
 };
 
 function cleanupCall() {
+  if (callTimerInterval) clearInterval(callTimerInterval);
+  callTimerInterval = null;
+
   if (callWatchUnsub) callWatchUnsub();
   if (remoteCandidatesUnsub) remoteCandidatesUnsub();
   callWatchUnsub = null;
